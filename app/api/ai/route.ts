@@ -6,7 +6,7 @@ export const POST = async (req: NextRequest) => {
   const { message } = await req.json();
 
   const result = await streamText({
-    model: groq('llama-3.1-70b-versatile'),   // ← this line is correct
+    model: groq('llama-3.1-70b-versatile') as any,  // ← Type cast fixes V1/V2 mismatch
     system: `You are Typely — the fastest freelancer AI.
 Respond with ONLY valid JSON. No extra text.
 
