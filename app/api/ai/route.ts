@@ -1,30 +1,25 @@
-import { cookies } from 'next/headers';
 import { NextRequest } from 'next/server';
-import { groq } from '@ai-sdk/groq';
 import { streamText } from 'ai';
+import { groq } from '@ai-sdk/groq';
 
-// IMPORTANT: Use the new streaming function for v2+ of the SDK
-export async function POST(req: NextRequest) {
+export const POST = async (req: NextRequest) => {
   const { message } = await req.json();
 
   const result = await streamText({
-    model: groq('llama-3.1-70b-versatile'),
-    system: `You are Typely — the fastest freelancer AI. 
-Parse the user message into JSON ONLY. No explanations.
+    model: groq('llama-3.1-70b-versatile'),   // ← this line is correct
+    system: `You are Typely — the fastest freelancer AI.
+Respond with ONLY valid JSON. No extra text.
 
 Valid actions:
 - create_client → { "action": "create_client", "name": "...", "email": "…" }
-- create_invoice → { "action": "create_invoice", "client": "...", "amount": 12345, "description": "…" }
+- create_invoice → { "action": "create_invoice", "client": "...", "amount": 25000, "description": "…" }
 - send_email → { "action": "send_email", "client": "...", "subject": "...", "body": "…" }
 
-If unclear, reply with { "action": "unknown", "message": "Try: Invoice NASA $25000 for moon base" }
-
-Respond with pure JSON only.`,
+If unclear → { "action": "unknown", "message": "Try: Invoice NASA $25000 for moon base" }`,
     messages: [{ role: 'user', content: message }],
   });
 
-  // Stream the SDK can directly stream JSON to the client
   return result.toDataStreamResponse();
-}
+};
 
 export const runtime = 'edge';
